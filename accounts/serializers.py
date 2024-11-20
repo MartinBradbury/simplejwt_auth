@@ -15,18 +15,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         fields = ('email', 'username', 'password1', 'password2', 'id',)
         extra_kwargs = {'password': {'write_only': True}}
 
-        def validate(self, attrs):
-            password = attrs.get("password", "")
-            if len(password) <8:
-                raise serializers.ValidationError("Password is too short")
-            if attrs['password1'] != attrs['password2']:
-                raise serializers.ValidationError('Passwords do not match')
-            return attrs
+    def validate(self, attrs):
+        password = attrs.get("password1", "")
+        if len(password) < 8:
+            raise serializers.ValidationError("Password is too short")
+        if attrs['password1'] != attrs['password2']:
+            raise serializers.ValidationError('Passwords do not match')
+        return attrs
 
-        def create(self, validated_data):
-            password = validated_data.pop('password')
-            validated_data.pop('password2')
-            return CustomUser.objects.create_user(password = password, **validated_data)
+    def create(self, validated_data):
+        password = validated_data.pop('password1')
+        validated_data.pop('password2')
+        return CustomUser.objects.create_user(password = password, **validated_data)
 
 class UserLoginSerializer(serializers.ModelSerializer):
     email = serializers.CharField(max_length=255)
