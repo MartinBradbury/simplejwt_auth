@@ -2,9 +2,10 @@ from django.shortcuts import render
 from .serializers import *
 from rest_framework.generics import GenericAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from .models import CustomUser
 
 
 class UserRegistrationAPIView(GenericAPIView):
@@ -18,4 +19,10 @@ class UserRegistrationAPIView(GenericAPIView):
         data = serializer.data
         data['token'] = {'refresh':str(token), 'access':str(token.access_token)}
         return Response(data, status=status.HTTP_201_CREATED)
+
+class UserLoginAPIView(generics.ListAPIView):
+    permission_class = (AllowAny,)
+    serializer_class = UserLoginSerializer
+    queryset = CustomUser.objects.all()
+
 
