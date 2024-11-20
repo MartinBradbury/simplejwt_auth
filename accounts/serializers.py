@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from django.contrib.auth import authenticate
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,3 +27,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             password = validated_data.pop('password')
             validated_data.pop('password2')
             return CustomUser.objects.create_user(password = password, **validated_data)
+
+class UserLoginSerializer(serializers.ModelSerializer):
+    email = serializers.CharField(max_length=255)
+    password = serializers.CharField(write_only=True)
+    def validate_data(self, data):
+        user = authenticate(**data)
+        if user and user.is_active:
+            return user
+        raise serializers.ValidationError("incorrect details")
