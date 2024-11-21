@@ -40,3 +40,8 @@ class UserLoginSerializer(serializers.ModelSerializer):
         if user and user.is_active:
             return user
         raise serializers.ValidationError("incorrect details")
+
+class UserDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = '__all__'
