@@ -20,10 +20,38 @@ class UserRegistrationAPIView(GenericAPIView):
         data['token'] = {'refresh':str(token), 'access':str(token.access_token)}
         return Response(data, status=status.HTTP_201_CREATED)
 
-class UserLoginAPIView(generics.ListAPIView):
-    permission_class = (AllowAny,)
+
+class UserLoginAPIView(GenericAPIView):
+    permission_classes = (AllowAny,)
     serializer_class = UserLoginSerializer
-    queryset = CustomUser.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        # Validate the input data
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Authenticate the user
+        email = serializer.validated_data['email']
+        password = serializer.validated_data['password']
+        user = authenticate(request, email=email, password=password)
+
+        if user:
+            # Generate tokens for the user
+            refresh = RefreshToken.for_user(user)
+            data = {
+                "user": CustomUserSerializer(user).data,
+                "token": {
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                },
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {"detail": "Invalid email or password"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
 
 class UserDetailsAPIView(generics.ListAPIView):
     permission_classes = (AllowAny,)

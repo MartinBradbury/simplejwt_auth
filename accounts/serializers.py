@@ -28,12 +28,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         validated_data.pop('password2')
         return CustomUser.objects.create_user(password = password, **validated_data)
 
-class UserLoginSerializer(serializers.ModelSerializer):
+class UserLoginSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
     password = serializers.CharField(write_only=True)
-    class Meta:
-        model = CustomUser
-        fields = '__all__'
 
     def validate_data(self, data):
         user = authenticate(**data)
